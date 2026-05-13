@@ -5,10 +5,6 @@ import omni.timeline
 
 from isaacsim.core.prims import SingleArticulation
 
-from pathlib import Path
-
-ROOT = Path(r"C:/Users/proje/Desktop/alesurankar/scripts/humanoid_project_isaacsim")
-
 timeline = omni.timeline.get_timeline_interface()
 
 # START SIMULATION
@@ -55,8 +51,13 @@ joint_map = {
 
 
 # LOAD JSON
-with open(ROOT / "data" / "motion.json", "r") as f:
+with open(
+    r"C:\Users\proje\Desktop\alesurankar\scripts\humanoid_project_isaacsim\data\motion.json",
+    "r"
+) as f:
+
     motion = json.load(f)
+
 
 async def move_from_json(steps=120):
 

@@ -1,16 +1,8 @@
-import sys
-from pathlib import Path
-
-# add project root to Python path
-sys.path.append(
-    str(Path(__file__).resolve().parent.parent)
-)
-
-from env import ROOT
-
 import json
 
-JSON_PATH = ROOT / "data" / "motion.json"
+JSON_PATH = (
+    r"C:\Users\proje\Desktop\alesurankar\scripts\humanoid_project_isaacsim\data\motion.json"
+)
 
 
 def set_joint(joint_name, value):

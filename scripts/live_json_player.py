@@ -6,9 +6,6 @@ import omni.kit.app
 import omni.timeline
 
 from isaacsim.core.prims import SingleArticulation
-from pathlib import Path
-
-ROOT = Path(__file__).parent.parent
 
 timeline = omni.timeline.get_timeline_interface()
 
@@ -54,8 +51,9 @@ joint_map = {
     "R_wrist_roll_joint": 29,
 }
 
-
-JSON_PATH = ROOT / "data" / "motion.json"
+JSON_PATH = (
+    r"C:\Users\proje\Desktop\alesurankar\scripts\humanoid_project_isaacsim\data\motion.json"
+)
 
 
 async def live_json_motion():
