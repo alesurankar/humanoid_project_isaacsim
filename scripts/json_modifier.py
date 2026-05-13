@@ -1,8 +1,9 @@
 import json
+from pathlib import Path
 
-JSON_PATH = (
-    r"C:\Users\proje\Desktop\alesurankar\scripts\humanoid_project_isaacsim\data\motion.json"
-)
+ROOT = Path(__file__).parent.parent
+
+JSON_PATH = ROOT / "data" / "motion.json"
 
 
 def set_joint(joint_name, value):
