@@ -1,7 +1,14 @@
-import json
+import sys
 from pathlib import Path
 
-ROOT = Path(__file__).parent.parent
+# add project root to Python path
+sys.path.append(
+    str(Path(__file__).resolve().parent.parent)
+)
+
+from env import ROOT
+
+import json
 
 JSON_PATH = ROOT / "data" / "motion.json"
 
