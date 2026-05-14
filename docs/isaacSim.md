@@ -1,11 +1,5 @@
 
-# run issacSim
+# run issacSim + model
 ```bash
-Start-Process -FilePath "C:\isaacsim\isaac-sim.bat"
+C:\isaacsim\python.bat C:\Users\proje\Desktop\alesurankar\scripts\humanoid_project_isaacsim\main.py
 ```
-
-# docs
-```text
-ARTICULATION ROOT: /s2_v1/base_link
-```
-

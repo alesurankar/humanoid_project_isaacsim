@@ -1,19 +1,11 @@
 import json
-import asyncio
 import os
 
 import omni.kit.app
-import omni.timeline
 
 from isaacsim.core.prims import SingleArticulation
 from joint_map import joint_map
 
-# TIMELINE
-timeline = omni.timeline.get_timeline_interface()
-
-# START SIMULATION
-if not timeline.is_playing():
-    timeline.play()
 
 # ROBOT
 robot = SingleArticulation("/s2_v1/base_link")
@@ -30,6 +22,7 @@ async def live_json_motion():
     last_modified = 0
 
     while True:
+
         try:
 
             # CHECK FILE MODIFICATION TIME
@@ -39,10 +32,12 @@ async def live_json_motion():
             if modified != last_modified:
 
                 last_modified = modified
+
                 print("JSON UPDATED")
 
                 # LOAD JSON
                 with open(JSON_PATH, "r") as f:
+
                     motion = json.load(f)
 
                 # CURRENT ROBOT POSE
@@ -56,11 +51,15 @@ async def live_json_motion():
 
                 # APPLY JSON VALUES
                 for joint_name, value in joints.items():
+
                     if joint_name in joint_map:
+
                         joint_index = joint_map[joint_name]
+
                         target_positions[joint_index] = value
 
                     else:
+
                         print(f"UNKNOWN JOINT: {joint_name}")
 
                 # SEND TARGETS TO ROBOT
@@ -72,9 +71,3 @@ async def live_json_motion():
 
         # WAIT ONE FRAME
         await omni.kit.app.get_app().next_update_async()
-
-
-# START ASYNC TASK
-asyncio.ensure_future(
-    live_json_motion()
-)
