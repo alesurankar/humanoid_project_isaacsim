@@ -1,7 +1,7 @@
 {
   "joints": {
     "waist_yaw_joint": 0.0,
-    "waist_pitch_joint": 1.1,
+    "waist_pitch_joint": 0.4,
     "head_yaw_joint": 0.0,
     "head_pitch_joint": 0.0,
     "L_shoulder_pitch_joint": 0.7,

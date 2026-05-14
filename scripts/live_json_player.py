@@ -6,6 +6,7 @@ import omni.kit.app
 import omni.timeline
 
 from isaacsim.core.prims import SingleArticulation
+from joint_map import joint_map
 
 timeline = omni.timeline.get_timeline_interface()
 
@@ -15,41 +16,6 @@ if not timeline.is_playing():
 
 robot = SingleArticulation("/s2_v1/base_link")
 robot.initialize()
-
-
-# JOINT NAME -> INDEX
-joint_map = {
-    "L_hip_roll_joint": 0,
-    "R_hip_roll_joint": 1,
-    "waist_yaw_joint": 2,
-    "L_hip_yaw_joint": 3,
-    "R_hip_yaw_joint": 4,
-    "waist_pitch_joint": 5,
-    "L_hip_pitch_joint": 6,
-    "R_hip_pitch_joint": 7,
-    "L_knee_pitch_joint": 8,
-    "R_knee_pitch_joint": 9,
-    "L_shoulder_pitch_joint": 10,
-    "R_shoulder_pitch_joint": 11,
-    "head_yaw_joint": 12,
-    "L_ankle_pitch_joint": 13,
-    "R_ankle_pitch_joint": 14,
-    "L_shoulder_roll_joint": 15,
-    "R_shoulder_roll_joint": 16,
-    "head_pitch_joint": 17,
-    "L_ankle_roll_joint": 18,
-    "R_ankle_roll_joint": 19,
-    "L_shoulder_yaw_joint": 20,
-    "R_shoulder_yaw_joint": 21,
-    "L_elbow_roll_joint": 22,
-    "R_elbow_roll_joint": 23,
-    "L_elbow_yaw_joint": 24,
-    "R_elbow_yaw_joint": 25,
-    "L_wrist_pitch_joint": 26,
-    "R_wrist_pitch_joint": 27,
-    "L_wrist_roll_joint": 28,
-    "R_wrist_roll_joint": 29,
-}
 
 JSON_PATH = (
     r"C:\Users\proje\Desktop\alesurankar\scripts\humanoid_project_isaacsim\data\motion.json"
@@ -63,7 +29,6 @@ async def live_json_motion():
     while True:
 
         try:
-
             modified = os.path.getmtime(JSON_PATH)
 
             # FILE CHANGED
