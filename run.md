@@ -1,4 +1,4 @@
 
 
 # json file modifier
-python C:\Users\proje\Desktop\alesurankar\scripts\humanoid_project_isaacsim\scripts\joint_controller.py
+python C:\Users\proje\Desktop\alesurankar\scripts\humanoid_project_isaacsim\controllers\joint_controller.py

@@ -29,27 +29,24 @@ async def live_json_motion():
 
     while True:
         try:
-            modified = os.path.getmtime(JSON_PATH)
-            if modified != last_modified:
-                last_modified = modified
-                print("JSON UPDATED")
+            # print("READING JSON")
 
-                with open(JSON_PATH, "r") as f:
-                    motion = json.load(f)
+            with open(JSON_PATH, "r") as f:
+                motion = json.load(f)
 
-                current_positions = robot.get_joint_positions()
-                target_positions = current_positions.copy()
-                joints = motion["joints"]
+            current_positions = robot.get_joint_positions()
+            target_positions = current_positions.copy()
 
-                for joint_name, value in joints.items():
-                    if joint_name in joint_map:
-                        joint_index = joint_map[joint_name]
-                        target_positions[joint_index] = value
+            joints = motion["joints"]
 
-                    else:
-                        print(f"UNKNOWN JOINT: {joint_name}")
+            for joint_name, value in joints.items():
 
-                robot.set_joint_positions(target_positions)
+                if joint_name in joint_map:
+
+                    joint_index = joint_map[joint_name]
+                    target_positions[joint_index] = value
+
+            robot.set_joint_positions(target_positions)
 
         except Exception as e:
             print("ERROR:", e)
