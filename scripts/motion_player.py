@@ -30,7 +30,6 @@ async def live_json_motion():
     last_modified = 0
 
     while True:
-
         try:
 
             # CHECK FILE MODIFICATION TIME
@@ -40,7 +39,6 @@ async def live_json_motion():
             if modified != last_modified:
 
                 last_modified = modified
-
                 print("JSON UPDATED")
 
                 # LOAD JSON
