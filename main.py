@@ -7,8 +7,14 @@ simulation_app = SimulationApp(
 import asyncio
 import omni.timeline
 
+from isaacsim.core.prims import SingleArticulation
 from isaacsim.core.utils.stage import open_stage
-from players.motion_player import live_json_motion
+
+from players.motion_player import (
+    live_json_motion
+)
+
+import players.udp_receiver as udp_receiver
 
 
 USD_PATH = (
@@ -24,9 +30,19 @@ print("USD loaded!")
 timeline = omni.timeline.get_timeline_interface()
 timeline.play()
 
-# START MOTION PLAYER
+# WAIT FOR PHYSICS
+for _ in range(10):
+    simulation_app.update()
+
+# CREATE ROBOT
+robot = SingleArticulation("/s2_v1/base_link")
+robot.initialize()
+
+print("Robot initialized!")
+
+# START JSON MOTION PLAYER
 asyncio.ensure_future(
-    live_json_motion()
+    live_json_motion(robot)
 )
 
 print("Motion player started!")
@@ -35,5 +51,14 @@ print("Motion player started!")
 while simulation_app.is_running():
 
     simulation_app.update()
+
+    # RECEIVE UDP
+    udp_receiver.udp_spin_once()
+
+    # UDP OVERRIDES JSON
+    if udp_receiver.latest_joint_positions is not None:
+        robot.set_joint_positions(
+            udp_receiver.latest_joint_positions
+        )
 
 simulation_app.close()
