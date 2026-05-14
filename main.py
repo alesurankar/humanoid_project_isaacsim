@@ -4,8 +4,12 @@ simulation_app = SimulationApp(
     {"headless": False}
 )
 
-from isaacsim.core.utils.stage import open_stage
+import asyncio
 import omni.timeline
+
+from isaacsim.core.utils.stage import open_stage
+from players.motion_player import live_json_motion
+
 
 USD_PATH = (
     r"C:\Users\proje\Desktop\Max\Unity - Projects\RobotAndroidController\Assets\RobotSim\Collected_WalkerS2\s2_v1.usd"
@@ -16,22 +20,20 @@ open_stage(USD_PATH)
 
 print("USD loaded!")
 
-# TIMELINE
+# START TIMELINE
 timeline = omni.timeline.get_timeline_interface()
-
 timeline.play()
 
-counter = 0
+# START MOTION PLAYER
+asyncio.ensure_future(
+    live_json_motion()
+)
+
+print("Motion player started!")
 
 # MAIN LOOP
 while simulation_app.is_running():
 
     simulation_app.update()
-
-    counter += 1
-
-    if counter % 1000 == 0:
-
-        print("MAIN LOOP RUNNING")
 
 simulation_app.close()
