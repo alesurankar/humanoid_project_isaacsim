@@ -18,12 +18,6 @@ def udp_spin_once():
     try:
         data, addr = sock.recvfrom(65535)
 
-        print("\n==============================")
-        print("[UDP] PACKET RECEIVED")
-        print("[UDP] FROM:", addr)
-        print("[UDP] SIZE:", len(data))
-        print("[UDP] RAW BYTES:", data[:80], "..." if len(data) > 80 else "")
-
         try:
             message = json.loads(data.decode("utf-8"))
         except Exception as e:
