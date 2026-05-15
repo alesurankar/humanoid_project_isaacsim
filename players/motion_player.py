@@ -2,50 +2,54 @@ import json
 import os
 import omni.kit.app
 from isaacsim.core.prims import SingleArticulation
-from isaacsim.core.utils.types import ArticulationAction
 
 
 JSON_PATH = (
     r"C:\Users\proje\Desktop\alesurankar\scripts\humanoid_project_isaacsim\data\motion.json"
 )
 
-async def live_json_motion(robot, state):
-
+async def live_json_motion(robot):
+    # WAIT UNTIL STAGE LOADS
     await omni.kit.app.get_app().next_update_async()
+    await omni.kit.app.get_app().next_update_async()
+    await omni.kit.app.get_app().next_update_async()
+    print("INITIALIZING ROBOT")
 
-    joint_map = {name: i for i, name in enumerate(robot.dof_names)}
+    joint_map = {
+        name: i
+        for i, name in enumerate(robot.dof_names)
+    }
+    print(joint_map)
 
-    print("DOF NAMES:", robot.dof_names)
+    print("ROBOT INITIALIZED")
+    last_modified = 0
 
     while True:
-
         try:
-            with open(JSON_PATH, "r") as f:
-                motion = json.load(f)
+            modified = os.path.getmtime(JSON_PATH)
+            
+            # ONLY UPDATE IF FILE CHANGED
+            if modified != last_modified:
+                last_modified = modified
+                print("JSON UPDATED")
 
-            target_positions = robot.get_joint_positions().copy()
+                with open(JSON_PATH, "r") as f:
+                    motion = json.load(f)
 
-            updated_count = 0
+                current_positions = robot.get_joint_positions()
+                target_positions = current_positions.copy()
+                joints = motion["joints"]
 
-            for joint_name, value in motion["joints"].items():
+                for joint_name, value in joints.items():
+                    if joint_name in joint_map:
+                        joint_index = joint_map[joint_name]
+                        target_positions[joint_index] = value
 
-                if joint_name in joint_map:
-                    target_positions[joint_map[joint_name]] = value
-                    updated_count += 1
-                else:
-                    print("[MISSING JOINT]", joint_name)
-
-            if updated_count > 0:
-
-                state.motion_action = ArticulationAction(
-                    joint_positions=target_positions
+                robot.set_joint_positions(
+                    target_positions
                 )
 
-                state.mode = "motion"
-
-                print(f"Applied {updated_count} joints")
-
         except Exception as e:
-            print("MOTION ERROR:", e)
+            print("ERROR:", e)
 
         await omni.kit.app.get_app().next_update_async()
