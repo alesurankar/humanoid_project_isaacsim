@@ -1,76 +1,79 @@
-import json
-import os
-import numpy as np
+# import json
+# import os
+# import numpy as np
 
-import omni.kit.app
+# import omni.kit.app
 
-from omni.isaac.motion_generation import (
-    LulaKinematicsSolver,
-    ArticulationKinematicsSolver
-)
+# from omni.isaac.motion_generation import (
+#     LulaKinematicsSolver,
+#     ArticulationKinematicsSolver
+# )
 
-JSON_PATH = (
-    "/home/aleur/ros2_ws/src/humanoid_project_isaacsim/data/ik_test_move.json"
-)
+# PROJECT_ROOT = (
+#     r"C:\Users\proje\Desktop\alesurankar\scripts\humanoid_project_isaacsim"
+# )
 
-# CHANGE THESE
-URDF_PATH = (
-    "/home/aleur/robot.urdf"
-)
+# JSON_PATH = (
+#     rf"{PROJECT_ROOT}\data\ik_test_move.json"
+# )
 
-ROBOT_DESCRIPTION_PATH = (
-    "/home/aleur/robot_descriptor.yaml"
-)
+# URDF_PATH = (
+#     r"C:\Users\proje\Desktop\alesurankar\scripts\walker_s2_description\urdf\s2\s2.urdf"
+# )
 
-END_EFFECTOR_NAME = "L_hand"
-TORSO_LINK_NAME = "base_link"
+# ROBOT_DESCRIPTION_PATH = (
+#     rf"{PROJECT_ROOT}\robot_descriptor.yaml"
+# )
 
-async def live_ik_motion(robot, state):
+# END_EFFECTOR_NAME = "L_hand"
+# TORSO_LINK_NAME = "base_link"
 
-    for _ in range(5):
-        await omni.kit.app.get_app().next_update_async()
+# async def live_ik_motion(robot, state):
 
-    lula_solver = LulaKinematicsSolver(
-        robot_description_path=ROBOT_DESCRIPTION_PATH,
-        urdf_path=URDF_PATH
-    )
+#     for _ in range(5):
+#         await omni.kit.app.get_app().next_update_async()
 
-    ik_solver = ArticulationKinematicsSolver(
-        robot_articulation=robot,
-        kinematics_solver=lula_solver,
-        end_effector_frame_name=END_EFFECTOR_NAME
-    )
+#     lula_solver = LulaKinematicsSolver(
+#         robot_description_path=ROBOT_DESCRIPTION_PATH,
+#         urdf_path=URDF_PATH
+#     )
 
-    last_modified = 0
+#     ik_solver = ArticulationKinematicsSolver(
+#         robot_articulation=robot,
+#         kinematics_solver=lula_solver,
+#         end_effector_frame_name=END_EFFECTOR_NAME
+#     )
 
-    while True:
+#     last_modified = 0
 
-        try:
-            modified = os.path.getmtime(JSON_PATH)
+#     while True:
 
-            if modified != last_modified:
-                last_modified = modified
+#         try:
+#             modified = os.path.getmtime(JSON_PATH)
 
-                with open(JSON_PATH, "r") as f:
-                    packet = json.load(f)
+#             if modified != last_modified:
+#                 last_modified = modified
 
-                left_hand = packet["left_hand"]
-                local_position = np.array(left_hand["position"])
+#                 with open(JSON_PATH, "r") as f:
+#                     packet = json.load(f)
 
-                torso_index = robot.get_link_index(TORSO_LINK_NAME)
-                torso_pos, torso_quat = robot.get_link_world_pose(torso_index)
+#                 left_hand = packet["left_hand"]
+#                 local_position = np.array(left_hand["position"])
 
-                world_position = torso_pos + local_position
+#                 torso_index = robot.get_link_index(TORSO_LINK_NAME)
+#                 torso_pos, torso_quat = robot.get_link_world_pose(torso_index)
 
-                action, success = ik_solver.compute_inverse_kinematics(
-                    target_position=world_position,
-                    target_orientation=np.array([0,0,0,1])
-                )
+#                 world_position = torso_pos + local_position
 
-                if success:
-                    state.ik_action = action
+#                 action, success = ik_solver.compute_inverse_kinematics(
+#                     target_position=world_position,
+#                     target_orientation=np.array([0,0,0,1])
+#                 )
 
-        except Exception as e:
-            print("IK ERROR:", e)
+#                 if success:
+#                     state.ik_action = action
 
-        await omni.kit.app.get_app().next_update_async()
+#         except Exception as e:
+#             print("IK ERROR:", e)
+
+#         await omni.kit.app.get_app().next_update_async()

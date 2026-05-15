@@ -1,6 +1,5 @@
 import socket
 import json
-from isaacsim.core.utils.types import ArticulationAction
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind(("0.0.0.0", 5005))
@@ -17,9 +16,8 @@ def udp_spin_once(state):
 
         joint_positions = message["joint_positions"]
 
-        state.udp_action = ArticulationAction(
-            joint_positions=joint_positions
-        )
+        # ✔ OLD SIMPLE STYLE (WORKS RELIABLY)
+        state.udp_action = joint_positions
 
     except BlockingIOError:
         pass

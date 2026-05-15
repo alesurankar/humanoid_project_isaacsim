@@ -15,29 +15,35 @@ async def live_json_motion(robot, state):
 
     joint_map = {name: i for i, name in enumerate(robot.dof_names)}
 
-    last_modified = 0
+    print("DOF NAMES:", robot.dof_names)
 
     while True:
 
         try:
-            modified = os.path.getmtime(JSON_PATH)
+            with open(JSON_PATH, "r") as f:
+                motion = json.load(f)
 
-            if modified != last_modified:
-                last_modified = modified
+            target_positions = robot.get_joint_positions().copy()
 
-                with open(JSON_PATH, "r") as f:
-                    motion = json.load(f)
+            updated_count = 0
 
-                target_positions = robot.get_joint_positions().copy()
+            for joint_name, value in motion["joints"].items():
 
-                for joint_name, value in motion["joints"].items():
-                    if joint_name in joint_map:
-                        idx = joint_map[joint_name]
-                        target_positions[idx] = value
+                if joint_name in joint_map:
+                    target_positions[joint_map[joint_name]] = value
+                    updated_count += 1
+                else:
+                    print("[MISSING JOINT]", joint_name)
+
+            if updated_count > 0:
 
                 state.motion_action = ArticulationAction(
                     joint_positions=target_positions
                 )
+
+                state.mode = "motion"
+
+                print(f"Applied {updated_count} joints")
 
         except Exception as e:
             print("MOTION ERROR:", e)

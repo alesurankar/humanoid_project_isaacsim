@@ -11,12 +11,12 @@ from isaacsim.core.prims import SingleArticulation
 from isaacsim.core.utils.stage import open_stage
 
 from players.motion_player import live_json_motion
-from players.ik_player import live_ik_motion
+#from players.ik_player import live_ik_motion
 import players.udp_receiver as udp_receiver
 from players.state import ControlState
 
-state = ControlState()
 
+state = ControlState()
 
 USD_PATH = (
     r"C:\Users\proje\Desktop\Max\Unity - Projects\RobotAndroidController\Assets\RobotSim\Collected_WalkerS2\s2_v1.usd"
@@ -45,9 +45,9 @@ print("Robot initialized!")
 asyncio.ensure_future(
     live_json_motion(robot, state)
 )
-asyncio.ensure_future(
-    live_ik_motion(robot, state)
-)
+# asyncio.ensure_future(
+#     live_ik_motion(robot, state)
+# )
 
 print("Motion player started!")
 
@@ -63,13 +63,13 @@ while simulation_app.is_running():
     # PRIORITY SYSTEM
     # =========================
 
-    if state.mode == "udp":
+    if state.mode == "udp" and state.udp_action is not None:
         robot.apply_action(state.udp_action)
 
-    elif state.mode == "ik":
-        robot.apply_action(state.ik_action)
+    # elif state.mode == "ik" and state.ik_action is not None:
+    #     robot.apply_action(state.ik_action)
 
-    elif state.mode == "motion":
+    elif state.mode == "motion" and state.motion_action is not None:
         robot.apply_action(state.motion_action)
 
 simulation_app.close()
