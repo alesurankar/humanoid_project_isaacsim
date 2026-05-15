@@ -10,11 +10,12 @@ import omni.timeline
 from isaacsim.core.prims import SingleArticulation
 from isaacsim.core.utils.stage import open_stage
 
-from players.motion_player import (
-    live_json_motion
-)
-
+from players.motion_player import live_json_motion
+from players.ik_player import live_ik_motion
 import players.udp_receiver as udp_receiver
+from players.state import ControlState
+
+state = ControlState()
 
 
 USD_PATH = (
@@ -42,7 +43,10 @@ print("Robot initialized!")
 
 # START JSON MOTION PLAYER
 asyncio.ensure_future(
-    live_json_motion(robot)
+    live_json_motion(robot, state)
+)
+asyncio.ensure_future(
+    live_ik_motion(robot, state)
 )
 
 print("Motion player started!")
@@ -53,12 +57,19 @@ while simulation_app.is_running():
     simulation_app.update()
 
     # RECEIVE UDP
-    udp_receiver.udp_spin_once()
+    udp_receiver.udp_spin_once(state)
 
-    # UDP OVERRIDES JSON
-    if udp_receiver.latest_joint_positions is not None:
-        robot.set_joint_positions(
-            udp_receiver.latest_joint_positions
-        )
+    # =========================
+    # PRIORITY SYSTEM
+    # =========================
+
+    if state.mode == "udp":
+        robot.apply_action(state.udp_action)
+
+    elif state.mode == "ik":
+        robot.apply_action(state.ik_action)
+
+    elif state.mode == "motion":
+        robot.apply_action(state.motion_action)
 
 simulation_app.close()
