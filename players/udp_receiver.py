@@ -21,19 +21,19 @@ def udp_spin_once():
         try:
             message = json.loads(data.decode("utf-8"))
         except Exception as e:
-            print("[UDP] JSON PARSE FAILED:", e)
+            #print("[UDP] JSON PARSE FAILED:", e)
             return
 
-        print("[UDP] PARSED:", message)
+        #print("[UDP] PARSED:", message)
 
         if "joint_positions" not in message:
-            print("[UDP] WARNING: missing joint_positions key")
+            #print("[UDP] WARNING: missing joint_positions key")
             return
 
         latest_joint_positions = message["joint_positions"]
 
-        print("[UDP] STORED JOINTS:", len(latest_joint_positions))
-        print("==============================\n")
+        #print("[UDP] STORED JOINTS:", len(latest_joint_positions))
+        #print("==============================\n")
 
     except BlockingIOError:
         pass

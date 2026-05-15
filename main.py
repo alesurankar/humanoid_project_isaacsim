@@ -5,6 +5,7 @@ simulation_app = SimulationApp(
 )
 
 import asyncio
+import numpy as np
 import omni.timeline
 
 from isaacsim.core.prims import SingleArticulation
@@ -37,6 +38,10 @@ for _ in range(10):
 # CREATE ROBOT
 robot = SingleArticulation("/s2_v1/base_link")
 robot.initialize()
+current_positions = np.array(
+    robot.get_joint_positions(),
+    dtype=np.float32
+)
 
 print("Robot initialized!")
 
@@ -49,6 +54,9 @@ print("Motion player started!")
 
 # TRACK PHYSICS STATE
 robot_ready = True
+
+# INTERPOLATION SPEED
+alpha = 0.2
 
 # MAIN LOOP
 while simulation_app.is_running():
@@ -66,6 +74,11 @@ while simulation_app.is_running():
 
             try:
                 robot.initialize()
+                current_positions = np.array(
+                    robot.get_joint_positions(),
+                    dtype=np.float32
+                )
+
                 robot_ready = True
                 print("ROBOT REINITIALIZED")
 
@@ -83,11 +96,22 @@ while simulation_app.is_running():
     ):
 
         try:
-            robot.set_joint_positions(
-                udp_receiver.latest_joint_positions
+            target_positions = np.array(
+                udp_receiver.latest_joint_positions,
+                dtype=np.float32
             )
 
-            print("APPLIED")
+            # SMOOTH INTERPOLATION
+            current_positions = (
+                (1.0 - alpha) * current_positions
+                + alpha * target_positions
+            )
+
+            robot.set_joint_positions(
+                current_positions
+            )
+
+            #print("APPLIED")
 
         except Exception as e:
             print("SET JOINT ERROR:", e)

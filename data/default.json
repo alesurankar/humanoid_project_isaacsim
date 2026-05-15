@@ -13,7 +13,7 @@
         "L_wrist_roll_joint": 0.0,
         "R_shoulder_pitch_joint": 0.0,
         "R_shoulder_roll_joint": 0.0,
-        "R_shoulder_yaw_joint": 1.0,
+        "R_shoulder_yaw_joint": 0.0,
         "R_elbow_roll_joint": 0.0,
         "R_elbow_yaw_joint": 0.0,
         "R_wrist_pitch_joint": 0.0,
