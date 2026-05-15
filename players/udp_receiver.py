@@ -1,39 +1,48 @@
 import socket
 import json
+import time
 
 latest_joint_positions = None
 
-sock = socket.socket(
-    socket.AF_INET,
-    socket.SOCK_DGRAM
-)
-
-sock.bind(("0.0.0.0", 5005))
-
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sock.bind(("127.0.0.1", 5005))
 sock.setblocking(False)
 
-print("UDP receiver listening on port 5005")
+print("[UDP] Receiver started on 0.0.0.0:5005")
+print("[UDP] Socket fd:", sock.fileno())
 
 
 def udp_spin_once():
     global latest_joint_positions
+
     try:
         data, addr = sock.recvfrom(65535)
 
-        print("RAW UDP:", data)
+        print("\n==============================")
+        print("[UDP] PACKET RECEIVED")
+        print("[UDP] FROM:", addr)
+        print("[UDP] SIZE:", len(data))
+        print("[UDP] RAW BYTES:", data[:80], "..." if len(data) > 80 else "")
 
-        message = json.loads(
-            data.decode("utf-8")
-        )
+        try:
+            message = json.loads(data.decode("utf-8"))
+        except Exception as e:
+            print("[UDP] JSON PARSE FAILED:", e)
+            return
 
-        print("PARSED:", message)
+        print("[UDP] PARSED:", message)
+
+        if "joint_positions" not in message:
+            print("[UDP] WARNING: missing joint_positions key")
+            return
 
         latest_joint_positions = message["joint_positions"]
 
-        print("JOINTS RECEIVED")
+        print("[UDP] STORED JOINTS:", len(latest_joint_positions))
+        print("==============================\n")
 
     except BlockingIOError:
         pass
 
     except Exception as e:
-        print("UDP ERROR:", e)
+        print("[UDP ERROR]", type(e).__name__, e)

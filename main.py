@@ -48,17 +48,24 @@ asyncio.ensure_future(
 print("Motion player started!")
 
 # MAIN LOOP
+tick = 0
+
 while simulation_app.is_running():
 
     simulation_app.update()
+    tick += 1
 
-    # RECEIVE UDP
+    if tick % 100 == 0:
+        print("\n[TICK]", tick, "loop alive")
+
     udp_receiver.udp_spin_once()
 
-    # UDP OVERRIDES JSON
     if udp_receiver.latest_joint_positions is not None:
-        robot.set_joint_positions(
-            udp_receiver.latest_joint_positions
-        )
+
+        print("[MAIN] GOT JOINTS:", udp_receiver.latest_joint_positions[:5])
+
+        robot.set_joint_positions(udp_receiver.latest_joint_positions)
+
+        print("[MAIN] APPLIED TO ROBOT")
 
 simulation_app.close()
