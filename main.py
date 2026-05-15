@@ -54,6 +54,17 @@ while simulation_app.is_running():
     udp_receiver.udp_spin_once()
 
     if udp_receiver.latest_joint_positions is not None:
-        robot.set_joint_positions(udp_receiver.latest_joint_positions)
+
+        if timeline.is_playing() and robot.handles_initialized:
+
+            try:
+                robot.set_joint_positions(
+                    udp_receiver.latest_joint_positions
+                )
+
+                print("APPLIED")
+
+            except Exception as e:
+                print("SET JOINT ERROR:", e)
 
 simulation_app.close()
