@@ -1,119 +1,98 @@
 from isaacsim import SimulationApp
 
-simulation_app = SimulationApp(
-    {"headless": False}
-)
+simulation_app = SimulationApp({"headless": False})
 
-import asyncio
-import numpy as np
-import omni.timeline
-
-from isaacsim.core.prims import SingleArticulation
 from isaacsim.core.utils.stage import open_stage
+from isaacsim.core.utils.stage import get_current_stage
+from isaacsim.core.prims import SingleArticulation
+import omni.timeline
+import time
+import omni.usd
 
-# from players.motion_player import (
-#     live_json_motion
-# )
 
-import players.udp_receiver as udp_receiver
+USD_PATH = "/home/proj/RobotAssets/Collected_WalkerS2/s2_v1.usd"
 
-
-USD_PATH = (
-    r"C:\Users\proje\Desktop\Max\Unity - Projects\RobotAndroidController\Assets\RobotSim\Collected_WalkerS2\s2_v1.usd"
-)
-
-# LOAD USD
+# -----------------------------
+# LOAD SCENE
+# -----------------------------
 open_stage(USD_PATH)
+print("USD loaded")
 
-print("USD loaded!")
+for _ in range(120):
+    simulation_app.update()
 
-# START TIMELINE
+# -----------------------------
+# START SIMULATION
+# -----------------------------
 timeline = omni.timeline.get_timeline_interface()
 timeline.play()
 
-# WAIT FOR PHYSICS
-for _ in range(10):
+for _ in range(120):
     simulation_app.update()
 
-# CREATE ROBOT
-robot = SingleArticulation("/s2_v1/base_link")
-robot.initialize()
-current_positions = np.array(
-    robot.get_joint_positions(),
-    dtype=np.float32
-)
+print("Simulation running")
 
-print("Robot initialized!")
+# -----------------------------
+# ROBOT INIT (SAFE)
+# -----------------------------
+robot_path = "/s2_v1/base_link"
 
-# START JSON MOTION PLAYER
-# asyncio.ensure_future(
-#     live_json_motion(robot)
-# )
+stage = get_current_stage()
+prim = stage.GetPrimAtPath(robot_path)
 
-print("Motion player started!")
+print("Robot prim valid:", prim.IsValid())
 
-# TRACK PHYSICS STATE
-robot_ready = True
+robot = None
 
-# INTERPOLATION SPEED
-alpha = 0.2
+if prim.IsValid():
+    robot = SingleArticulation(robot_path)
+    robot.initialize()
+    print("Robot initialized")
+else:
+    print("Robot NOT found — check prim path")
 
+# -----------------------------
+# TIMED LOGGER (every 4 sec)
+# -----------------------------
+last_print_time = time.time()
+
+# -----------------------------
 # MAIN LOOP
+# -----------------------------
 while simulation_app.is_running():
 
     simulation_app.update()
 
-    # RECEIVE UDP
-    udp_receiver.udp_spin_once()
-
-    # HANDLE STOP/PLAY
-    if timeline.is_playing():
-
-        # Physics restarted
-        if not robot_ready:
-
-            try:
-                robot.initialize()
-                current_positions = np.array(
-                    robot.get_joint_positions(),
-                    dtype=np.float32
-                )
-
-                robot_ready = True
-                print("ROBOT REINITIALIZED")
-
-            except Exception as e:
-                print("ROBOT INIT ERROR:", e)
-
-    else:
-        # Physics stopped
-        robot_ready = False
-
-    # APPLY UDP JOINTS
-    if (
-        robot_ready
-        and udp_receiver.latest_joint_positions is not None
-    ):
+    # print every 4 seconds
+    if robot is not None and (time.time() - last_print_time) > 4.0:
 
         try:
-            target_positions = np.array(
-                udp_receiver.latest_joint_positions,
-                dtype=np.float32
-            )
+            # -------------------------
+            # JOINT STATES
+            # -------------------------
+            joints = robot.get_joint_positions()
 
-            # SMOOTH INTERPOLATION
-            current_positions = (
-                (1.0 - alpha) * current_positions
-                + alpha * target_positions
-            )
+            print("\n===== JOINT STATES =====")
+            print(joints)
 
-            robot.set_joint_positions(
-                current_positions
-            )
+            # -------------------------
+            # TF (base_link world pose)
+            # -------------------------
+            stage = get_current_stage()
+            base_prim = stage.GetPrimAtPath(robot_path)
 
-            #print("APPLIED")
+            tf_matrix = omni.usd.get_world_transform_matrix(base_prim)
+
+            pos = tf_matrix.ExtractTranslation()
+            rot = tf_matrix.ExtractRotation()
+
+            print("===== TF (base_link) =====")
+            print("Position:", pos)
+            print("Rotation:", rot)
+
+            last_print_time = time.time()
 
         except Exception as e:
-            print("SET JOINT ERROR:", e)
+            print("LOG ERROR:", e)
 
 simulation_app.close()
